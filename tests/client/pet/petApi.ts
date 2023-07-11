@@ -8,7 +8,7 @@ export class PetAPI {
   findPetsByStatus(status: string[]) {
     return "/" + status;
   }
-  findPetById(petId: string) {
+  petById(petId: string) {
     return "/" + petId;
   }
   updatePetFormData() {}

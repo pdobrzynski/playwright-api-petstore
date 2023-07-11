@@ -61,6 +61,41 @@ export class Message {
     });
   }
 
+  public async postFormDataMessage(
+    formData: any,
+    resource: string,
+    returns: any,
+    status: any
+  ) {
+    let statusResponse: number;
+    let callResponse: any;
+
+    await test.step("POST form-data", async () => {
+      const response = await this.reqContext.post(resource, {
+        headers: {
+          accept: "application/json",
+          api_key: "special-key",
+        },
+        form: formData,
+      });
+      statusResponse = response.status();
+      callResponse = await response.json();
+    });
+
+    await test.step(`Status is ${status}`, async () => {
+      expect(statusResponse, "Expected status").toBe(status);
+    });
+
+    await test.step("Resposne body matches the expected body", async () => {
+      expect
+        .soft(
+          await callResponse,
+          "The response does not match the expected results"
+        )
+        .toEqual(returns);
+    });
+  }
+
   public async deleteMessage(resource: string, returns: any, status: any) {
     let statusResponse: number;
     let callResponse: any;
@@ -90,7 +125,7 @@ export class Message {
     });
   }
 
-  public async putMessage(resource: string, status: any) {
+  public async putMessage(body: any, resource: string, status: any) {
     let statusResponse: number;
 
     await test.step("PUT", async () => {
@@ -99,6 +134,7 @@ export class Message {
           accept: "application/json",
           api_key: "special-key",
         },
+        data: body,
       });
       statusResponse = response.status();
     });

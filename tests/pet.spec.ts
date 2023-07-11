@@ -2,7 +2,7 @@ import { PetAPI } from "./client/pet/petApi";
 import { test } from "@playwright/test";
 import { Message } from "./client/restClientBase";
 
-const addPetObject = {
+const examplePetObject = {
   id: 1,
   category: {
     id: 1,
@@ -19,10 +19,16 @@ const addPetObject = {
   status: "available",
 };
 
-const successDeleteResponse = {
+const successResponse = {
   code: 200,
   type: "unknown",
   message: "1",
+};
+
+const notFoundResponse = {
+  code: 404,
+  type: "unknown",
+  message: "not found",
 };
 
 const petToUpdateObject = {
@@ -56,26 +62,49 @@ test.describe("Pet API", () => {
 
   test("Add a new pet to the store, should returns 200", async () => {
     await message.postMessage(
-      petApi.addPet(addPetObject),
+      petApi.addPet(examplePetObject),
       petUrl,
-      addPetObject,
+      examplePetObject,
       200
     );
   });
   test("Find pet by ID, should returns 200", async () => {
     await message.getMessage(
-      petUrl + petApi.findPetById(addPetObject.id.toString()),
+      petUrl + petApi.petById(examplePetObject.id.toString()),
       200
     );
   });
-  test("Delete pet by ID, should returns 200 and 404 on GET pet by ID", async () => {
+  test(`Update pet by ID ${examplePetObject.id}, should returns 200`, async () => {
+    await message.putMessage(petToUpdateObject, petUrl, 200);
+  });
+  test(`Update pet with id ${examplePetObject.id} by form-data`, async () => {
+    await message.postFormDataMessage(
+      {
+        name: examplePetObject.name,
+        status: examplePetObject.status,
+      },
+      petUrl + petApi.petById(examplePetObject.id.toString()),
+      successResponse,
+      200
+    );
+  });
+  test("Delete pet by ID, should returns 200 and 404 on find and update pet by ID", async () => {
     await message.deleteMessage(
-      petUrl + petApi.deletePet(addPetObject.id.toString()),
-      successDeleteResponse,
+      petUrl + petApi.deletePet(examplePetObject.id.toString()),
+      successResponse,
       200
     );
     await message.getMessage(
-      petUrl + petApi.findPetById(addPetObject.id.toString()),
+      petUrl + petApi.petById(examplePetObject.id.toString()),
+      404
+    );
+    await message.postFormDataMessage(
+      {
+        name: examplePetObject.name,
+        status: examplePetObject.status,
+      },
+      petUrl + petApi.petById(examplePetObject.id.toString()),
+      notFoundResponse,
       404
     );
   });
