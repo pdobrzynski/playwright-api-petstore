@@ -1,32 +1,10 @@
 import { test } from "@playwright/test";
 import { Message } from "./client/restClientBase";
 import { StoreAPI } from "./client/store/storeApi";
-
-const addOrderObject = {
-  id: 1,
-  petId: 1,
-  quantity: 1,
-  shipDate: "2023-07-06T07:09:30.489Z",
-  status: "placed",
-  complete: true,
-};
-
-const expectedAddOrderResponseObject = {
-  id: 1,
-  petId: 1,
-  quantity: 1,
-  shipDate: "2023-07-06T07:09:30.489+0000",
-  status: "placed",
-  complete: true,
-};
-
-const successDeleteResponse = {
-  code: 200,
-  type: "unknown",
-  message: "1",
-};
+import { testData } from "./test-data";
 
 const storeUrl = process.env.STORE_URL;
+const storeUrlOrder = process.env.STORE_URL_ORDER;
 
 test.describe("Store API", () => {
   const storeApi = new StoreAPI();
@@ -38,26 +16,35 @@ test.describe("Store API", () => {
 
   test("Place an order for a pet, should returns 200", async () => {
     await message.postMessage(
-      storeApi.addAnOrder(addOrderObject),
-      storeUrl + "/order",
-      expectedAddOrderResponseObject,
+      storeApi.addAnOrder(testData.exampleAddStoreOrderObject[0]),
+      storeUrlOrder,
+      testData.exampleAddStoreOrderObject[1],
       200
     );
   });
   test("Find purchase order by ID, should returns 200", async () => {
     await message.getMessage(
-      storeUrl + storeApi.getOrderById(addOrderObject.id.toString()),
+      storeUrl +
+        storeApi.getOrderById(
+          testData.exampleAddStoreOrderObject[0].id.toString()
+        ),
       200
     );
   });
   test("Delete purchase order by ID, should returns 200 and 404 on GET order by ID", async () => {
     await message.deleteMessage(
-      storeUrl + storeApi.deleteOrderById(addOrderObject.id.toString()),
-      successDeleteResponse,
+      storeUrl +
+        storeApi.deleteOrderById(
+          testData.exampleAddStoreOrderObject[0].id.toString()
+        ),
+      testData.validation[0],
       200
     );
     await message.getMessage(
-      storeUrl + storeApi.getOrderById(addOrderObject.id.toString()),
+      storeUrl +
+        storeApi.getOrderById(
+          testData.exampleAddStoreOrderObject[0].id.toString()
+        ),
       404
     );
   });
